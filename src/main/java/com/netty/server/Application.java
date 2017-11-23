@@ -1,12 +1,11 @@
 package com.netty.server;
 
-import java.net.InetSocketAddress;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -16,15 +15,14 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
+
+import javax.annotation.Resource;
+import java.net.InetSocketAddress;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
- *
  * @author Shanqiang Ke
  * @version 1.0.0
  * @blog http://nosqlcoco.cnblogs.com
@@ -32,26 +30,27 @@ import io.netty.handler.logging.LoggingHandler;
  */
 @SpringBootApplication
 @ComponentScan(value = "com.netty.server")
-@PropertySource(value= "classpath:/application.properties")
-public class Application{
-	@Configuration
+@PropertySource(value = "classpath:/application.properties")
+public class Application {
+    @Configuration
     @Profile("production")
     @PropertySource("classpath:/application.properties")
-    static class Production
-    { }
+    static class Production {
+    }
 
     @Configuration
     @Profile("local")
     @PropertySource({"classpath:/application.properties"})
-    static class Local
-    { }
-	public static void main(String[] args) throws Exception {
-		ConfigurableApplicationContext context = SpringApplication.run(Application.class, args);
+    static class Local {
+    }
+
+    public static void main(String[] args) throws Exception {
+        ConfigurableApplicationContext context = SpringApplication.run(Application.class, args);
         TCPServer tcpServer = context.getBean(TCPServer.class);
         tcpServer.start();
-	}
+    }
 
-	@Value("${tcp.port}")
+    @Value("${tcp.port}")
     private int tcpPort;
 
     @Value("${boss.thread.count}")
@@ -65,7 +64,7 @@ public class Application{
 
     @Value("${so.backlog}")
     private int backlog;
-    
+
     @SuppressWarnings("unchecked")
     @Bean(name = "serverBootstrap")
     public ServerBootstrap bootstrap() {
@@ -82,8 +81,7 @@ public class Application{
         return b;
     }
 
-    @Autowired
-    @Qualifier("serverChannelInitializer")
+    @Resource(name = "serverChannelInitializer")
     private ServerChannelInitializer serverChannelInitializer;
 
     @Bean(name = "tcpChannelOptions")
